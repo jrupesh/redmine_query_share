@@ -1,10 +1,4 @@
-# require 'gitlab/repositories_controller_patch'
-# require 'gitlab/repository_patch'
-
-# Rails.configuration.to_prepare do
-#   require 'gitlab/repositories_helper_patch'
-# end
-
+require 'redmine'
 require 'query_share/patches/query_patch'
 require 'query_share/patches/user_patch'
 require 'query_share/patches/issue_query_patch'
