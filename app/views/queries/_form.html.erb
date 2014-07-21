@@ -20,7 +20,7 @@
     <%= radio_button 'query', 'visibility', Query::VISIBILITY_GROUP %> <%= l(:label_visibility_group) %>
   </label>
   <label class="block role-visibility">
-    <% user_list = @project.nil? ? User.all.collect{|user| [user.name, user.id] if user.active? } : 
+    <% user_list = @project.nil? ? User.all.select{|user| [user.name, user.id] if user.active? } : 
                              @project.users.sorted.collect { |u| [ u.name, u.id ] } %>
     <%= select_tag( "query[user_ids][]", options_for_select( user_list,
          @query.users.map(&:id) ), :multiple => true, :style => "min-height:100px;width:300px;" ) %>
