@@ -16,11 +16,11 @@
   <% end %>
   <label class="block"><%= radio_button 'query', 'visibility', Query::VISIBILITY_PUBLIC %> <%= l(:label_visibility_public) %></label>
 
-  <label class="block">
-    <%= radio_button 'query', 'visibility', Query::VISIBILITY_GROUP %> <%= l(:label_visibility_group) %>
-  </label>
-
   <% if Setting.plugin_redmine_query_share['query_share_enable'] == "1" %>
+    <label class="block">
+      <%= radio_button 'query', 'visibility', Query::VISIBILITY_GROUP %> <%= l(:label_visibility_group) %>
+    </label>
+
     <label class="block role-visibility">
       <% user_list = @project.nil? ? User.all.sorted.select{|u| User.current.id != u.id && u.active? }.map{ |u| [u.name, u.id] } :
                                @project.users.sorted.select{|u| User.current.id != u.id && u.active? }.map{ |u| [u.name, u.id] } %>
