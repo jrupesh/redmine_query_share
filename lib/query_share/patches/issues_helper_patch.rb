@@ -20,7 +20,7 @@ module QueryShare
         def sidebar_queries_with_share
           unless @sidebar_queries
             @sidebar_queries = sidebar_queries_without_share
-            @sidebar_queries += User.current.queries if Setting.plugin_redmine_query_share['query_share_enable'] == "1"
+            @sidebar_queries += User.current.queries.select{ |q| q.project.nil? || q.project == @project } if Setting.plugin_redmine_query_share['query_share_enable'] == "1"
             @sidebar_queries.uniq!
           end
           @sidebar_queries

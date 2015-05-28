@@ -11,8 +11,7 @@ module QueryShare
           unloadable
           alias_method_chain :visible?, :share
 
-          '''
-          scope :visible, lambda {|*args|
+          scope :esi_visible_queries, lambda {|*args|
             user = args.shift || User.current
             base = Project.allowed_to_condition(user, :view_issues, *args)
             scope = joins("LEFT OUTER JOIN #{Project.table_name} ON #{table_name}.project_id = #{Project.table_name}.id").
@@ -37,7 +36,6 @@ module QueryShare
               scope.where("#{table_name}.visibility = ?", IssueQuery::VISIBILITY_PUBLIC)
             end
           }
-        '''
         end
       end
 
