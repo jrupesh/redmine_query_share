@@ -11,8 +11,8 @@ module QueryShare
 
         base.class_eval do
           unloadable
-          has_and_belongs_to_many :users, :join_table   => "#{table_name_prefix}queries_users#{table_name_suffix}",
-            :class_name => 'User', :foreign_key => 'query_id'
+          has_and_belongs_to_many :principals, :join_table   => "#{table_name_prefix}queries_users#{table_name_suffix}",
+            :class_name => 'Principal', :foreign_key => 'query_id', :association_foreign_key => 'user_id'
 
           query_inclusion_validator = base._validators[:visibility].find{ |validator| validator.is_a? ActiveModel::Validations::InclusionValidator }
           base._validators[:visibility].delete(query_inclusion_validator)
@@ -23,12 +23,12 @@ module QueryShare
                                                  base::VISIBILITY_PRIVATE, base::VISIBILITY_GROUP] }
 
           validate do |query|
-            errors.add(:base, l(:label_user_plural) + ' ' + l('activerecord.errors.messages.blank')) if query.visibility == base::VISIBILITY_GROUP && users.blank?
+            errors.add(:base, l(:label_user_plural) + ' ' + l('activerecord.errors.messages.blank')) if query.visibility == base::VISIBILITY_GROUP && principals.blank?
           end
 
           after_save do |query|
             if query.visibility_changed? && query.visibility != base::VISIBILITY_GROUP
-              query.users.clear
+              query.principals.clear
             end
           end
         end

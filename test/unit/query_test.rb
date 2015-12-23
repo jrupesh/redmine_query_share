@@ -22,12 +22,12 @@ class QueryTest < ActiveSupport::TestCase
     query = IssueQuery.new(:name => 'Query', :visibility => IssueQuery::VISIBILITY_GROUP)
     assert !query.save
     assert_include "Users cannot be blank", query.errors.full_messages
-    query.user_ids = [1, 2]
+    query.principal_ids = [1, 2]
     assert query.save
   end
 
   def test_changing_groups_visibility_should_clear_users
-    query = IssueQuery.create!(:name => 'Query', :visibility => IssueQuery::VISIBILITY_GROUP, :user_ids => [1, 2])
+    query = IssueQuery.create!(:name => 'Query', :visibility => IssueQuery::VISIBILITY_GROUP, :principal_ids => [1, 2])
     assert_equal 2, query.users.count
 
     query.visibility = IssueQuery::VISIBILITY_PUBLIC
@@ -36,7 +36,7 @@ class QueryTest < ActiveSupport::TestCase
   end
 
   def test_query_with_group_visibility_should_be_visible_to_user_with_group
-    q = IssueQuery.create!(:name => 'Query', :visibility => IssueQuery::VISIBILITY_GROUP, :user_ids => [1,2])
+    q = IssueQuery.create!(:name => 'Query', :visibility => IssueQuery::VISIBILITY_GROUP, :principal_ids => [1,2])
 
     assert !q.visible?(User.anonymous)
     assert_nil IssueQuery.visible(User.anonymous).find_by_id(q.id)

@@ -1,3 +1,7 @@
 en:
   label_query_share_enable: Enable Query Sharing
   label_visibility_group: to selected Users
+  label_user_count: User selection limit
+  label_user_count_desc: The advanced user selection is activated beyond this limit of project users.
+  label_group_custom_field: Non Project Member Groups to show.
+  label_all_user_groups: Project member user groups.

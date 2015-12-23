@@ -17,7 +17,8 @@ module QueryShare
 
       module InstanceMethods
         def update_query_from_params_with_share
-          @query.user_ids = params[:query] && params[:query][:user_ids]
+          @query.principal_ids = params[:query] && params[:query][:principal_ids]
+          @query.principals_logins = params[:query] && params[:query][:principals_logins]
           update_query_from_params_without_share
         end
       end
