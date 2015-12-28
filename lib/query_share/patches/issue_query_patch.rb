@@ -9,36 +9,6 @@ module QueryShare
           unloadable
           alias_method_chain :visible?, :share
 
-          scope :esi_visible, lambda {|*args|
-            user = args.shift || User.current
-            base_query = Project.allowed_to_condition(user, :view_issues, *args)
-            scope = joins("LEFT OUTER JOIN #{Project.table_name} ON #{table_name}.project_id = #{Project.table_name}.id").
-              where("#{table_name}.project_id IS NULL OR (#{base_query})")
-            if user.admin?
-              scope.where("#{table_name}.type = '#{self.name}' AND (#{table_name}.visibility <> ? OR #{table_name}.user_id = ?)", IssueQuery::VISIBILITY_PRIVATE, user.id)
-            elsif user.memberships.any?
-              scope.where("#{table_name}.type = '#{self.name}' AND (#{table_name}.visibility = ?" +
-              " OR (#{table_name}.visibility = ? OR #{table_name}.visibility = ? AND #{table_name}.id IN (" +
-              "SELECT DISTINCT q.id FROM #{table_name} q" +
-              " INNER JOIN #{table_name_prefix}queries_roles#{table_name_suffix} qr on qr.query_id = q.id" +
-              " INNER JOIN #{MemberRole.table_name} mr ON mr.role_id = qr.role_id" +
-              " INNER JOIN #{Member.table_name} m ON m.id = mr.member_id AND m.user_id = ?" +
-              " WHERE q.project_id IS NULL OR q.project_id = m.project_id" +
-              " UNION " +
-              "SELECT DISTINCT q.id FROM #{table_name} q" +
-              " LEFT OUTER JOIN #{table_name_prefix}queries_users#{table_name_suffix} qu on qu.query_id = q.id" +
-              " LEFT OUTER JOIN #{table_name_prefix}groups_users#{table_name_suffix} g on g.group_id = qu.user_id AND g.user_id = ?" +
-              " LEFT OUTER JOIN #{Member.table_name} m ON m.user_id = g.user_id OR m.user_id = ?" +
-              " WHERE q.project_id IS NULL OR q.project_id = m.project_id))" +
-              " OR #{table_name}.user_id = ?)", IssueQuery::VISIBILITY_PUBLIC, IssueQuery::VISIBILITY_ROLES, IssueQuery::VISIBILITY_GROUP,
-              user.id, user.id, user.id, user.id)
-            elsif user.logged?
-              scope.where("#{table_name}.type = '#{self.name}' AND (#{table_name}.visibility = ? OR #{table_name}.user_id = ?)", IssueQuery::VISIBILITY_PUBLIC, user.id)
-            else
-              scope.where("#{table_name}.type = '#{self.name}' AND #{table_name}.visibility = ?", IssueQuery::VISIBILITY_PUBLIC)
-            end
-          }
-
           class << self
             alias_method :visible,  :esi_visible
           end
@@ -46,8 +16,35 @@ module QueryShare
       end
 
       module ClassMethods
-        # def esi_visible(*args)
-        # end
+        def esi_visible(*args)
+          user = args.shift || User.current
+          base_query = Project.allowed_to_condition(user, :view_issues, *args)
+          scope = joins("LEFT OUTER JOIN #{Project.table_name} ON #{table_name}.project_id = #{Project.table_name}.id").
+            where("#{table_name}.project_id IS NULL OR (#{base_query})")
+          if user.admin?
+            scope.where("#{table_name}.type = '#{self.name}' AND (#{table_name}.visibility <> ? OR #{table_name}.user_id = ?)", IssueQuery::VISIBILITY_PRIVATE, user.id)
+          elsif user.memberships.any?
+            scope.where("#{table_name}.type = '#{self.name}' AND (#{table_name}.visibility = ?" +
+            " OR (#{table_name}.visibility = ? OR #{table_name}.visibility = ? AND #{table_name}.id IN (" +
+            "SELECT DISTINCT q.id FROM #{table_name} q" +
+            " INNER JOIN #{table_name_prefix}queries_roles#{table_name_suffix} qr on qr.query_id = q.id" +
+            " INNER JOIN #{MemberRole.table_name} mr ON mr.role_id = qr.role_id" +
+            " INNER JOIN #{Member.table_name} m ON m.id = mr.member_id AND m.user_id = ?" +
+            " WHERE q.project_id IS NULL OR q.project_id = m.project_id" +
+            " UNION " +
+            "SELECT DISTINCT q.id FROM #{table_name} q" +
+            " LEFT OUTER JOIN #{table_name_prefix}queries_users#{table_name_suffix} qu on qu.query_id = q.id" +
+            " LEFT OUTER JOIN #{table_name_prefix}groups_users#{table_name_suffix} g on g.group_id = qu.user_id AND g.user_id = ?" +
+            " LEFT OUTER JOIN #{Member.table_name} m ON m.user_id = g.user_id OR m.user_id = ?" +
+            " WHERE q.project_id IS NULL OR q.project_id = m.project_id))" +
+            " OR #{table_name}.user_id = ?)", IssueQuery::VISIBILITY_PUBLIC, IssueQuery::VISIBILITY_ROLES, IssueQuery::VISIBILITY_GROUP,
+            user.id, user.id, user.id, user.id)
+          elsif user.logged?
+            scope.where("#{table_name}.type = '#{self.name}' AND (#{table_name}.visibility = ? OR #{table_name}.user_id = ?)", IssueQuery::VISIBILITY_PUBLIC, user.id)
+          else
+            scope.where("#{table_name}.type = '#{self.name}' AND #{table_name}.visibility = ?", IssueQuery::VISIBILITY_PUBLIC)
+          end
+        end
       end
 
       module InstanceMethods

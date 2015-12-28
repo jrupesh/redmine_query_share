@@ -7,6 +7,11 @@
 <p><label for="query_name"><%=l(:field_name)%></label>
 <%= text_field 'query', 'name', :size => 80 %></p>
 
+<% if !@query.new_record? && @query.user %>
+<p><label for="query_author"><%=l(:field_author)%></label>
+<%= @query.user.name %></p>
+<% end %>
+
 <% if User.current.admin? || User.current.allowed_to?(:manage_public_queries, @query.project) ||
       User.current.allowed_to?(:manage_group_queries, @query.project) %>
 
