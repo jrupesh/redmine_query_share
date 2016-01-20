@@ -25,20 +25,20 @@ module QueryShare
             scope.where("#{table_name}.type = '#{self.name}' AND (#{table_name}.visibility <> ? OR #{table_name}.user_id = ?)", IssueQuery::VISIBILITY_PRIVATE, user.id)
           elsif user.memberships.any?
             scope.where("#{table_name}.type = '#{self.name}' AND (#{table_name}.visibility = ?" +
-            " OR (#{table_name}.visibility = ? OR #{table_name}.visibility = ? AND #{table_name}.id IN (" +
+            " OR (#{table_name}.id IN (" +
             "SELECT DISTINCT q.id FROM #{table_name} q" +
             " INNER JOIN #{table_name_prefix}queries_roles#{table_name_suffix} qr on qr.query_id = q.id" +
             " INNER JOIN #{MemberRole.table_name} mr ON mr.role_id = qr.role_id" +
             " INNER JOIN #{Member.table_name} m ON m.id = mr.member_id AND m.user_id = ?" +
-            " WHERE q.project_id IS NULL OR q.project_id = m.project_id" +
+            " WHERE #{table_name}.visibility = ? AND (q.project_id IS NULL OR q.project_id = m.project_id)" +
             " UNION " +
             "SELECT DISTINCT q.id FROM #{table_name} q" +
             " LEFT OUTER JOIN #{table_name_prefix}queries_users#{table_name_suffix} qu on qu.query_id = q.id" +
             " LEFT OUTER JOIN #{table_name_prefix}groups_users#{table_name_suffix} g on g.group_id = qu.user_id AND g.user_id = ?" +
             " LEFT OUTER JOIN #{Member.table_name} m ON m.user_id = g.user_id OR m.user_id = ?" +
-            " WHERE q.project_id IS NULL OR q.project_id = m.project_id))" +
-            " OR #{table_name}.user_id = ?)", IssueQuery::VISIBILITY_PUBLIC, IssueQuery::VISIBILITY_ROLES, IssueQuery::VISIBILITY_GROUP,
-            user.id, user.id, user.id, user.id)
+            " WHERE #{table_name}.visibility = ? AND (q.project_id IS NULL OR q.project_id = m.project_id)))" +
+            " OR #{table_name}.user_id = ?)", IssueQuery::VISIBILITY_PUBLIC, user.id, IssueQuery::VISIBILITY_ROLES, user.id, user.id, IssueQuery::VISIBILITY_GROUP,
+            user.id)
           elsif user.logged?
             scope.where("#{table_name}.type = '#{self.name}' AND (#{table_name}.visibility = ? OR #{table_name}.user_id = ?)", IssueQuery::VISIBILITY_PUBLIC, user.id)
           else
