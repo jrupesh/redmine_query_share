@@ -10,7 +10,7 @@ Redmine::Plugin.register :redmine_query_share do
   name 'Redmine Query share'
   author 'Rupesh J'
   description 'Share your redmine queries among specific user across user roles.'
-  version '2.0.0'
+  version '2.0.1'
   author_url 'mailto:rupeshj@esi-group.com'
 
   settings :default => {  :query_share_enable => false,
