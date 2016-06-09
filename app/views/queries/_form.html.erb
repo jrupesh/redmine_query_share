@@ -36,10 +36,10 @@
     </label>
 
     <label class="block role-visibility">
-      <% user_count = @project.nil? ? Principal.active.count : Principal.member_of([@project]).count
+      <% user_count = @project.nil? ? Principal.visible.count : Principal.member_of([@project]).count
        if user_count < Setting.plugin_redmine_query_share['user_count'].to_i %>
-          <% user_list = @project.nil? ? Principal.active.map{ |s| [s.name, s.login.present? ? s.id : s.id] } :
-                           Principal.member_of([@project]).sorted.map{ |s| [s.name, s.login.present? ? s.id : s.id] } +
+          <% user_list = @project.nil? ? Principal.visible.map{ |s| [s.name, s.id] } :
+                           Principal.member_of([@project]).sorted.map{ |s| [s.name, s.id] } +
                              Group.includes(:custom_values).where('custom_values.customized_type' => 'Principal',
                                 'custom_values.custom_field_id' => Setting.plugin_redmine_query_share["group_cf"] ).map{
                                     |s| [s.name, s.id] } %>
