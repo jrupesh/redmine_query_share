@@ -38,6 +38,9 @@ module QueryShare
       end
 
       module InstanceMethods
+        def is_shared_with_group?
+          visibility == Query::VISIBILITY_GROUP
+        end
       end
     end
   end

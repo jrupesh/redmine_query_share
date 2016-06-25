@@ -22,27 +22,39 @@ module QueryShare
           scope = joins("LEFT OUTER JOIN #{Project.table_name} ON #{table_name}.project_id = #{Project.table_name}.id").
             where("#{table_name}.project_id IS NULL OR (#{base_query})")
           if user.admin?
-            scope.where("#{table_name}.type = '#{self.name}' AND (#{table_name}.visibility <> ? OR #{table_name}.user_id = ?)", IssueQuery::VISIBILITY_PRIVATE, user.id)
+            scope.where("#{table_name}.type = '#{self.name}' AND (#{table_name}.visibility <> ? OR #{table_name}.user_id = ?)", Query::VISIBILITY_PRIVATE, user.id)
           elsif user.memberships.any?
-            scope.where("#{table_name}.type = '#{self.name}' AND (#{table_name}.visibility = ?" +
-            " OR (#{table_name}.id IN (" +
-            "SELECT DISTINCT q.id FROM #{table_name} q" +
-            " INNER JOIN #{table_name_prefix}queries_roles#{table_name_suffix} qr on qr.query_id = q.id" +
-            " INNER JOIN #{MemberRole.table_name} mr ON mr.role_id = qr.role_id" +
-            " INNER JOIN #{Member.table_name} m ON m.id = mr.member_id AND m.user_id = ?" +
-            " WHERE q.visibility = ? AND (q.project_id IS NULL OR q.project_id = m.project_id)" +
-            " UNION " +
-            "SELECT DISTINCT q.id FROM #{table_name} q" +
-            " LEFT JOIN #{table_name_prefix}queries_users#{table_name_suffix} qu on qu.query_id = q.id" +
-            " LEFT JOIN #{table_name_prefix}groups_users#{table_name_suffix} g on g.group_id = qu.user_id" +
-            " LEFT JOIN #{Member.table_name} m ON m.user_id = g.user_id OR m.user_id = qu.user_id" +
-            " WHERE q.visibility = ? AND (q.project_id IS NULL OR q.project_id = m.project_id) AND m.user_id = ?))" +
-            " OR #{table_name}.user_id = ?)", IssueQuery::VISIBILITY_PUBLIC, user.id, IssueQuery::VISIBILITY_ROLES, IssueQuery::VISIBILITY_GROUP, user.id,
-            user.id)
+            if Setting.plugin_redmine_query_share['query_share_enable'] == "1"
+              scope.where("#{table_name}.type = '#{self.name}' AND (#{table_name}.visibility = ?" +
+              " OR (#{table_name}.id IN (" +
+              "SELECT DISTINCT q.id FROM #{table_name} q" +
+              " INNER JOIN #{table_name_prefix}queries_roles#{table_name_suffix} qr on qr.query_id = q.id" +
+              " INNER JOIN #{MemberRole.table_name} mr ON mr.role_id = qr.role_id" +
+              " INNER JOIN #{Member.table_name} m ON m.id = mr.member_id AND m.user_id = ?" +
+              " WHERE q.visibility = ? AND (q.project_id IS NULL OR q.project_id = m.project_id)" +
+              " UNION " +
+              "SELECT DISTINCT q.id FROM #{table_name} q" +
+              " LEFT JOIN #{table_name_prefix}queries_users#{table_name_suffix} qu on qu.query_id = q.id" +
+              " LEFT JOIN #{table_name_prefix}groups_users#{table_name_suffix} g on g.group_id = qu.user_id" +
+              " LEFT JOIN #{Member.table_name} m ON m.user_id = g.user_id OR m.user_id = qu.user_id" +
+              " WHERE q.visibility = ? AND (q.project_id IS NULL OR q.project_id = m.project_id) AND m.user_id = ?))" +
+              " OR #{table_name}.user_id = ?)", Query::VISIBILITY_PUBLIC, user.id, Query::VISIBILITY_ROLES, Query::VISIBILITY_GROUP, user.id,
+              user.id)
+            else
+              scope.where("#{table_name}.visibility = ?" +
+                " OR (#{table_name}.visibility = ? AND #{table_name}.id IN (" +
+                  "SELECT DISTINCT q.id FROM #{table_name} q" +
+                  " INNER JOIN #{table_name_prefix}queries_roles#{table_name_suffix} qr on qr.query_id = q.id" +
+                  " INNER JOIN #{MemberRole.table_name} mr ON mr.role_id = qr.role_id" +
+                  " INNER JOIN #{Member.table_name} m ON m.id = mr.member_id AND m.user_id = ?" +
+                  " WHERE q.project_id IS NULL OR q.project_id = m.project_id))" +
+                " OR #{table_name}.user_id = ?",
+                Query::VISIBILITY_PUBLIC, Query::VISIBILITY_ROLES, user.id, user.id)
+            end
           elsif user.logged?
-            scope.where("#{table_name}.type = '#{self.name}' AND (#{table_name}.visibility = ? OR #{table_name}.user_id = ?)", IssueQuery::VISIBILITY_PUBLIC, user.id)
+            scope.where("#{table_name}.type = '#{self.name}' AND (#{table_name}.visibility = ? OR #{table_name}.user_id = ?)", Query::VISIBILITY_PUBLIC, user.id)
           else
-            scope.where("#{table_name}.type = '#{self.name}' AND #{table_name}.visibility = ?", IssueQuery::VISIBILITY_PUBLIC)
+            scope.where("#{table_name}.type = '#{self.name}' AND #{table_name}.visibility = ?", Query::VISIBILITY_PUBLIC)
           end
         end
       end
@@ -66,8 +78,8 @@ module QueryShare
         def visible_with_share?(user=User.current)
           return true if visible_without_share?(user) == true
           case visibility
-          when IssueQuery::VISIBILITY_GROUP
-            IssueQuery.visible.include?(self)
+          when Query::VISIBILITY_GROUP
+            self.class.visible.include?(self)
           else
             false
           end
@@ -85,9 +97,6 @@ module QueryShare
           is_public? && !@is_for_all && user.allowed_to?(:manage_public_queries, project)
         end
 
-        def is_shared_with_group?
-          visibility == IssueQuery::VISIBILITY_GROUP
-        end
       end
     end
   end
