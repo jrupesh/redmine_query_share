@@ -41,6 +41,11 @@ module QueryShare
         def is_shared_with_group?
           visibility == Query::VISIBILITY_GROUP
         end
+
+        def add_principals(user_groups=[])
+          self.principals += user_groups
+          self.principals.uniq
+        end
       end
     end
   end
