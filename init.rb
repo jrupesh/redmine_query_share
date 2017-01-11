@@ -3,8 +3,12 @@ Rails.configuration.to_prepare do
   require 'query_share/patches/query_patch'
   require 'query_share/patches/queries_controller_patch' if Redmine::VERSION::MAJOR >= 3
   require 'query_share/patches/queries_helper_patch'
+  require 'query_share/patches/issues_helper_patch'
 end
 
+ActionDispatch::Callbacks.to_prepare do
+  require_dependency 'query_share/hooks/view_layout'
+end
 
 Redmine::Plugin.register :redmine_query_share do
   name 'Redmine Query share'
