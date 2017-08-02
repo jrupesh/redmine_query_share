@@ -4,6 +4,10 @@ Rails.configuration.to_prepare do
   require 'query_share/patches/queries_controller_patch' if Redmine::VERSION::MAJOR >= 3
   require 'query_share/patches/queries_helper_patch'
   require 'query_share/patches/issues_helper_patch'
+
+  unless Query.included_modules.include? QueryShare::Patches::QueryPatch
+    Query.send(:include, QueryShare::Patches::QueryPatch)
+  end
 end
 
 ActionDispatch::Callbacks.to_prepare do

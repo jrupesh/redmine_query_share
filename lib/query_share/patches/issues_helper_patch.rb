@@ -3,7 +3,7 @@ module IssuesHelper
 
   def query_links_with_share(title, queries)
     return '' if queries.empty?
-    return query_links_without_share unless Setting.plugin_redmine_query_share['query_share_enable'] == "1"
+    return query_links_without_share(title, queries) unless Setting.plugin_redmine_query_share['query_share_enable'] == "1"
     # links to #index on issues/show
     url_params = controller_name == 'issues' ? {:controller => 'issues', :action => 'index', :project_id => @project} : params
 

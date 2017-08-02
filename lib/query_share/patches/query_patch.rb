@@ -1,4 +1,4 @@
-require_dependency 'query'
+# require_dependency 'query'
 
 module QueryShare
   module Patches
@@ -49,8 +49,4 @@ module QueryShare
       end
     end
   end
-end
-
-unless Query.included_modules.include? QueryShare::Patches::QueryPatch
-  Query.send(:include, QueryShare::Patches::QueryPatch)
 end
