@@ -42,4 +42,4 @@ User groups flagged with a boolean custom field to be included automatically in 
 >> Select this custom field option in the plugin settings. All the user groups defined
 with this option checked will automatically included in all the projects.
 
-Tested as compatible with Redmine v3.0.x, v3.1.x, v3.2.x
+Tested as compatible with Redmine v3.4.x
