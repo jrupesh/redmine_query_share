@@ -1,16 +1,16 @@
 <p>
   <label><%= l(:label_query_share_enable) %></label>
-  <%= check_box_tag 'settings[query_share_enable]', 1, @settings[:query_share_enable] %>
+  <%= check_box_tag 'settings[query_share_enable]', 1, settings['query_share_enable'] %>
 </p>
 <p>
   <label><%= l(:label_user_count) %></label>
-  <%= number_field_tag 'settings[user_count]', @settings[:user_count], size: 20 %>
+  <%= number_field_tag 'settings[user_count]', settings['user_count'], size: 20 %>
   <br />
   <em><%= l(:label_user_count_desc) %></em>
 </p>
 <p>
   <label><%= l(:label_group_custom_field) %></label>
   <%= select_tag 'settings[group_cf]', options_for_select( GroupCustomField.where(
-  :field_format => ["bool"]).pluck(:name,:id) + [[l(:label_all_user_groups), 0]] , settings[:group_cf] ),
+  :field_format => ["bool"]).pluck(:name,:id) + [[l(:label_all_user_groups), 0]] , settings['group_cf'] ),
   { :include_blank => true, :style => "width:200px" } %>
 </p>

@@ -43,10 +43,10 @@
                                     |s| [s.name, s.id] } %>
 
       <%= select_tag( "query[principal_ids][]", options_for_select( user_list,
-           @query.principals.map(&:id) ), :multiple => true, :style => "min-height:100px;width:300px;" ) %>
+           @query.query_principals.map(&:id) ), :multiple => true, :style => "min-height:100px;width:300px;" ) %>
 
      <% else %>
-        <%= text_field_tag 'query[principals_logins]', @query.principals.map{ |u| u.login.present? ? u.login : u.lastname }.join(', '),
+        <%= text_field_tag 'query[principals_logins]', @query.query_principals.map{ |u| u.login.present? ? u.login : u.lastname }.join(', '),
                   :id => 'shared_users', :style => "width:50%;"  %>
         <span id="users_append_to" style="height: 100px; width: 50%; overflow: auto;"/>
       <% end %>
@@ -112,18 +112,16 @@
 <fieldset id="options"><legend><%= l(:label_options) %></legend>
 <p><label for="query_default_columns"><%=l(:label_default_columns)%></label>
 <%= check_box_tag 'default_columns', 1, @query.has_default_columns?, :id => 'query_default_columns',
-      :onclick => 'if (this.checked) {$("#columns").hide();} else {$("#columns").show();}' %></p>
+      :data => {:disables => "#columns, .block_columns input"} %></p>
 
 <p><label for="query_group_by"><%= l(:field_group_by) %></label>
 <%= select 'query', 'group_by', @query.groupable_columns.collect {|c| [c.caption, c.name.to_s]}, :include_blank => true %></p>
 
-<p><label><%= l(:button_show) %></label>
+<p class="block_columns"><label><%= l(:button_show) %></label>
 <%= available_block_columns_tags(@query) %></p>
 
-<% if Redmine::VERSION::MAJOR >= 3 && Redmine::VERSION::MINOR >= 2 %>
 <p><label><%= l(:label_total_plural) %></label>
 <%= available_totalable_columns_tags(@query) %></p>
-<% end -%>
 </fieldset>
 <% else %>
 <fieldset id="options"><legend><%= l(:label_options) %></legend>
@@ -159,7 +157,7 @@
 <% end %>
 
 <% unless params[:gantt] %>
-<%= content_tag 'fieldset', :id => 'columns', :style => (query.has_default_columns? ? 'display:none;' : nil) do %>
+<%= content_tag 'fieldset', :id => 'columns' do %>
 <legend><%= l(:field_column_names) %></legend>
 <%= render_query_columns_selection(query) %>
 <% end %>

@@ -67,12 +67,12 @@ module QueryShare
           update_principals.delete_if {|x| x.blank? }
 
           logger.debug("Redmine QueryShare : users to update #{update_principals}")
-          cur_principals = self.principals.map{ |u| u.login.present? ? u.login : u.lastname }
+          cur_principals = self.query_principals.map{ |u| u.login.present? ? u.login : u.lastname }
           return if cur_principals.sort == update_principals.sort
 
-          self.principals.clear
-          self.principals = Principal.where("users.login in (?) OR users.lastname in (?)", update_principals, update_principals)
-          logger.debug("Redmine QueryShare : users updated #{self.principals.to_a}")
+          self.query_principals.clear
+          self.query_principals = Principal.where("users.login in (?) OR users.lastname in (?)", update_principals, update_principals)
+          logger.debug("Redmine QueryShare : users updated #{self.query_principals.to_a}")
         end
 
         def visible_with_share?(user=User.current)

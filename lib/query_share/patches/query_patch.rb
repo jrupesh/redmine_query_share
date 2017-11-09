@@ -1,17 +1,14 @@
-# require_dependency 'query'
-
 module QueryShare
   module Patches
     module QueryPatch
 
-      def self.included(base) # :nodoc:
-        base.extend(ClassMethods)
+      def self.included(base)
         base.const_set('VISIBILITY_GROUP', 3)
         base.send(:include, InstanceMethods)
 
         base.class_eval do
           unloadable
-          has_and_belongs_to_many :principals, :join_table   => "#{table_name_prefix}queries_users#{table_name_suffix}",
+          has_and_belongs_to_many :query_principals, :join_table   => "#{table_name_prefix}queries_users#{table_name_suffix}",
             :class_name => 'Principal', :foreign_key => 'query_id', :association_foreign_key => 'user_id'
 
           query_inclusion_validator = base._validators[:visibility].find{ |validator| validator.is_a? ActiveModel::Validations::InclusionValidator }
@@ -23,18 +20,15 @@ module QueryShare
                                                  base::VISIBILITY_PRIVATE, base::VISIBILITY_GROUP] }
 
           validate do |query|
-            errors.add(:base, l(:label_user_plural) + ' ' + l('activerecord.errors.messages.blank')) if query.visibility == base::VISIBILITY_GROUP && principals.blank?
+            errors.add(:base, l(:label_user_plural) + ' ' + l('activerecord.errors.messages.blank')) if query.visibility == base::VISIBILITY_GROUP && query_principals.blank?
           end
 
           after_save do |query|
             if query.visibility_changed? && query.visibility != base::VISIBILITY_GROUP
-              query.principals.clear
+              query.query_principals.clear
             end
           end
         end
-      end
-
-      module ClassMethods
       end
 
       module InstanceMethods
@@ -43,10 +37,14 @@ module QueryShare
         end
 
         def add_principals(user_groups=[])
-          self.principals += user_groups
-          self.principals.uniq
+          self.query_principals += user_groups
+          self.query_principals.uniq
         end
       end
     end
   end
+end
+
+unless Query.included_modules.include? QueryShare::Patches::QueryPatch
+  Query.send(:include, QueryShare::Patches::QueryPatch)
 end

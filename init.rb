@@ -1,13 +1,8 @@
 Rails.configuration.to_prepare do
   require 'query_share/patches/issue_query_patch'
   require 'query_share/patches/query_patch'
-  require 'query_share/patches/queries_controller_patch' if Redmine::VERSION::MAJOR >= 3
+  require 'query_share/patches/queries_controller_patch'
   require 'query_share/patches/queries_helper_patch'
-  require 'query_share/patches/issues_helper_patch'
-
-  unless Query.included_modules.include? QueryShare::Patches::QueryPatch
-    Query.send(:include, QueryShare::Patches::QueryPatch)
-  end
 end
 
 ActionDispatch::Callbacks.to_prepare do
@@ -18,8 +13,10 @@ Redmine::Plugin.register :redmine_query_share do
   name 'Redmine Query share'
   author 'Rupesh J'
   description 'Share your redmine queries among specific user across user roles.'
-  version '2.0.2'
+  version '2.1.0'
   author_url 'mailto:rupeshj@esi-group.com'
+
+  requires_redmine :version_or_higher => '3.4.0'
 
   settings :default => {  :query_share_enable => false,
                           :user_count         => 20,

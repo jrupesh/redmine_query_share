@@ -22,7 +22,7 @@ module QueryShare
 
           if (User.current.allowed_to?(:manage_group_queries, @query.project) || User.current.admin?) &&
            share_visibility.to_i == IssueQuery::VISIBILITY_GROUP
-            @query.principal_ids = params[:query] && params[:query][:principal_ids]
+            @query.query_principal_ids = params[:query] && params[:query][:principal_ids]
             @query.principals_logins = params[:query] && params[:query][:principals_logins]
             @query.visibility = share_visibility
           elsif @query.visibility.to_i == IssueQuery::VISIBILITY_GROUP
