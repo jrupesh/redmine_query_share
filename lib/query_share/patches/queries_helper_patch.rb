@@ -28,7 +28,13 @@ module QueriesHelper
                     :class => 'queries'
         ) + "\n"
   end
-  alias_method_chain :query_links, :share
+  #alias_method_chain :query_links, :share
+  alias_method :query_links_without_share, :query_links
+  alias_method :query_links, :query_links_with_share
+
+  #def query_links_without_share(title, queries)
+  #  return query_links(title, queries)
+  #end
 
   def sidebar_queries_with_share(klass, project)
     return sidebar_queries_without_share(klass, project) unless Setting.plugin_redmine_query_share['query_share_enable'] == "1"
@@ -37,5 +43,12 @@ module QueriesHelper
     end
     @sidebar_queries
   end
-  alias_method_chain :sidebar_queries, :share
+
+  #def sidebar_queries_without_share(klass, project)
+  #  return sidebar_queries(klass, project)
+  #end
+
+  #alias_method_chain :sidebar_queries, :share
+  alias_method :sidebar_queries_without_share, :sidebar_queries
+  alias_method :sidebar_queries, :sidebar_queries_with_share
 end

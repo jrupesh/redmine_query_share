@@ -5,7 +5,8 @@ Rails.configuration.to_prepare do
   require 'query_share/patches/queries_helper_patch'
 end
 
-ActionDispatch::Callbacks.to_prepare do
+#ActionDispatch::Callbacks.to_prepare do
+ActiveSupport::Reloader.to_prepare do
   require_dependency 'query_share/hooks/view_layout'
 end
 
