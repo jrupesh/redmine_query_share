@@ -1,4 +1,4 @@
-class CreateQueryUsers < ActiveRecord::Migration
+class CreateQueryUsers < ActiveRecord::Migration[4.2]
   def change
     create_table :queries_users, :id => false do |t|
       t.column :query_id, :integer, :null => false

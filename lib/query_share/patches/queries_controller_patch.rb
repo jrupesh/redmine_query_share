@@ -8,7 +8,9 @@ module QueryShare
 
         base.class_eval do
           unloadable
-          alias_method_chain :update_query_from_params, :share
+          #alias_method_chain :update_query_from_params, :share
+	  alias_method :update_query_from_params_without_share, :update_query_from_params
+	  alias_method :update_query_from_params, :update_query_from_params_with_share
         end
       end
 
@@ -16,9 +18,13 @@ module QueryShare
       end
 
       module InstanceMethods
+	#def upate_query_from_params_without_share
+	#  upate_query_from_params
+	#end
+
         def update_query_from_params_with_share
           update_query_from_params_without_share
-          if @query.instanceof?(IssueQuery)
+          if @query.instance_of? IssueQuery
             share_visibility = params[:query] && params[:query][:visibility]
 
             if (User.current.allowed_to?(:manage_group_queries, @query.project) || User.current.admin?) &&

@@ -7,7 +7,9 @@ module QueryShare
         base.send(:include, InstanceMethods)
         base.class_eval do
           unloadable
-          alias_method_chain :visible?, :share
+          #alias_method_chain :visible?, :share
+	  alias_method :visible_without_share?, :visible?
+	  alias_method :visible?, :visible_with_share?
 
           class << self
             alias_method :visible,  :esi_visible
@@ -75,7 +77,11 @@ module QueryShare
           logger.debug("Redmine QueryShare : users updated #{self.query_principals.to_a}")
         end
 
-        def visible_with_share?(user=User.current)
+        def visible_without_share?(user=User.current)
+	   return true if visible?(user) == true	
+	end
+
+	def visible_with_share?(user=User.current)
           return true if visible_without_share?(user) == true
           case visibility
           when Query::VISIBILITY_GROUP
